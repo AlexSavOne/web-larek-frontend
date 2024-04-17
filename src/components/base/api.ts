@@ -1,8 +1,4 @@
-// файл components/base/api.ts:
-export type ApiListResponse<Type> = {
-	total: number;
-	items: Type[];
-};
+export type ApiListResponse<Type> = { total: number; items: Type[] };
 
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
@@ -28,14 +24,14 @@ export class Api {
 				.then((data) => Promise.reject(data.error ?? response.statusText));
 	}
 
-	get(uri: string) {
+	async get(uri: string) {
 		return fetch(this.baseUrl + uri, {
 			...this.options,
 			method: 'GET',
 		}).then(this.handleResponse);
 	}
 
-	post(uri: string, data: object, method: ApiPostMethods = 'POST') {
+	async post(uri: string, data: object, method: ApiPostMethods = 'POST') {
 		return fetch(this.baseUrl + uri, {
 			...this.options,
 			method,

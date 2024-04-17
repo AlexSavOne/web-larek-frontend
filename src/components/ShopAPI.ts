@@ -1,37 +1,24 @@
-// файл components/ShopAPI.ts:
 import { Api, ApiListResponse } from './base/api';
-import { IProduct, ICartItem } from '../types';
-
-export interface IShopAPI {
-	getCart: () => Promise<Map<string, number>>;
-	addToCart: (item: ICartItem) => Promise<void>;
-	removeFromCart: (itemId: string) => Promise<void>;
-	getCatalog: () => Promise<IProduct[]>;
-	getOrderInfo: () => Promise<IOrder>;
-}
+import { IProduct, IOrder, IOrderResult, IShopAPI } from '../types';
 
 export class ShopAPI extends Api implements IShopAPI {
-	constructor(baseUrl: string, options?: RequestInit) {
+	readonly cdn: string;
+
+	constructor(cdn: string, baseUrl: string, options?: RequestInit) {
 		super(baseUrl, options);
+		this.cdn = cdn;
 	}
 
-	getCart(): Promise<Map<string, number>> {
-		return this.get('/cart');
+	async getCatalog(): Promise<IProduct[]> {
+		return this.get('/product').then((data: ApiListResponse<IProduct>) =>
+			data.items.map((item) => ({
+				...item,
+				image: this.cdn + item.image,
+			}))
+		);
 	}
 
-	addToCart(item: ICartItem): Promise<void> {
-		return this.post('/cart/add', item);
-	}
-
-	removeFromCart(itemId: string): Promise<void> {
-		return this.post(`/cart/remove/${itemId}`);
-	}
-
-	getCatalog(): Promise<IProduct[]> {
-		return this.get('/catalog');
-	}
-
-	getOrderInfo(): Promise<IOrder> {
-		return this.get('/order/info');
+	async orderCards(order: IOrder): Promise<IOrderResult> {
+		return this.post('/order', order).then((data: IOrderResult) => data);
 	}
 }

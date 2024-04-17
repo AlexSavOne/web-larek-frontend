@@ -1,8 +1,7 @@
 import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
 
 interface ISuccess {
-	total: number;
+	price: number;
 }
 
 interface ISuccessActions {
@@ -10,15 +9,19 @@ interface ISuccessActions {
 }
 
 export class Success extends Component<ISuccess> {
-	protected _close: HTMLElement;
+	protected _close: HTMLElement | null;
 
 	constructor(container: HTMLElement, actions: ISuccessActions) {
 		super(container);
 
-		this._close = ensureElement<HTMLElement>('.state__action', this.container);
+		this._close = document.getElementById('success');
 
-		if (actions?.onClick) {
-			this._close.addEventListener('click', actions.onClick);
+		if (this._close) {
+			if (actions?.onClick) {
+				this._close.addEventListener('click', actions.onClick);
+			}
+		} else {
+			console.error('Element with id "success" does not exist');
 		}
 	}
 }

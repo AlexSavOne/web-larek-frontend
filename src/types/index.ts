@@ -1,51 +1,69 @@
-import { EventEmitter } from '../components/base/events';
+import { EventEmitter } from '../components/base/Events';
 
-// Продукт
 export interface IProduct {
+	about: string;
 	id: string;
 	title: string;
 	description: string;
 	image: string;
 	category: string;
 	price: number | null;
-	addToCartButton: string;
-	buyButton: string;
+	button: string;
 }
 
-// Корзина
-export interface IBasketModel {
-	items: Map<string, number>;
-	add(id: string): void;
-	remove(id: string): void;
+export interface IModalData {
+	content: HTMLElement;
 }
 
-// Форма заказа
-export interface IOrderForm {
-	id: string;
-	email: string;
-	phone: string;
-	address: string;
-	total: number;
-	items: string[];
-	orderButton: string;
-	paymentMethod: 'online' | 'uponDelivery';
+export interface IBasketView {
+	items: HTMLElement[];
+	price: number;
+	selected: string[];
 }
 
-// Состояние приложения
+export type FormErrors = Partial<Record<keyof IOrder, string>>;
+
 export interface IAppState {
 	products: IProduct[];
-	basket: Map<string, number>;
+	basket: IBasketItem[];
 	preview: string | null;
-	orders: IOrderForm[] | null;
+	orders: IOrder[];
 	loading: boolean;
+	formErrors: FormErrors;
 }
 
-// Каталог товаров
-export interface ICatalogModel {
-	items: IProduct[]; // Список продуктов в каталоге
+export interface IOrderForm {
+	address: string;
+	payment: string;
+	email: string;
+	phone: string;
 }
 
-// Карточка товара
+export interface IOrder extends IOrderForm {
+	items: string[];
+	total: number;
+}
+
+export interface IOrderResult {
+	id: string;
+}
+
+export interface IShopAPI {
+	getCatalog: () => Promise<IProduct[]>;
+	orderCards: (order: IOrder) => Promise<IOrderResult>;
+}
+
+export interface IFormState {
+	valid: boolean;
+	errors: string[];
+}
+
+export interface IBasketItem {
+	id: string;
+	quantity: number;
+	image: string;
+}
+
 export interface ICard<T> {
 	title: string;
 	description?: string | string[];
@@ -53,12 +71,10 @@ export interface ICard<T> {
 	status: T;
 }
 
-// Интерфейс для конструктора представления
 export interface IViewConstructor {
 	new (container: HTMLElement, events?: EventEmitter): IView;
 }
 
-// Интерфейс для представления
 export interface IView {
 	render(data?: object): HTMLElement;
 }
