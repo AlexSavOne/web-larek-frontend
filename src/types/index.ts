@@ -1,4 +1,4 @@
-import { EventEmitter } from '../components/base/Events';
+import { EventEmitter } from '../components/base/events';
 
 export interface IProduct {
 	about: string;

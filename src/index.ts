@@ -2,7 +2,7 @@ import './scss/styles.scss';
 
 import { ShopAPI } from './components/ShopAPI';
 import { API_URL, CDN_URL } from './utils/constants';
-import { EventEmitter } from './components/base/Events';
+import { EventEmitter } from './components/base/events';
 import { AppState, CatalogChangeEvent } from './components/AppData';
 import { Page } from './components/Page';
 import { Card } from './components/Card';
@@ -43,21 +43,6 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 			price: item.price,
 			category: item.category,
 		});
-	});
-});
-
-events.on<IProduct>('preview:changed', (item: IProduct) => {
-	const previewCard = new Card(cloneTemplate(cardPreviewTemplate), {
-		onClick: () => events.emit('card:select', item),
-	});
-
-	modal.render({
-		content: previewCard.render({
-			title: item.title,
-			image: item.image,
-			price: item.price,
-			category: item.category,
-		}),
 	});
 });
 
@@ -189,52 +174,48 @@ events.on('card:select', (item: IProduct) => {
 			image: item.image,
 			price: item.price,
 			category: item.category,
+      description: item.description,
 		}),
 	});
 });
 
 events.on('contacts:submit', () => {
-	api
-		.orderCards(appData.order)
-		.then(() => {
-			const success = new Success(cloneTemplate(successTemplate), {
-				onClick: () => {
-					modal.close();
-					appData.clearBasket();
-					basket.clear();
-					appData.clearOrderTotal();
-					events.emit('basket:changed');
-				},
-			});
+  api
+      .orderCards(appData.order)
+      .then(() => {
+          const totalAmount = appData.order.total;
 
-			const successDescription = success.render({});
-			const descriptionElement = successDescription.querySelector(
-				'.order-success__description'
-			);
+          appData.clearBasket();
+          basket.clear();
+          appData.clearOrderTotal();
+          events.emit('basket:changed');
 
-			if (descriptionElement) {
-				descriptionElement.textContent = `Списано ${appData.order.total} синапсов`;
-			}
+          const success = new Success(cloneTemplate(successTemplate), {
+              onClick: () => {
+                  modal.close();
+              },
+          });
 
-			const closeButton = successDescription.querySelector(
-				'.order-success__close'
-			);
+          const successDescription = success.render({});
+          const descriptionElement = successDescription.querySelector('.order-success__description');
 
-			if (closeButton) {
-				closeButton.addEventListener('click', () => {
-					modal.close();
-					appData.clearBasket();
-					basket.clear();
-					appData.clearOrderTotal();
-					events.emit('basket:changed');
-				});
-			}
+          if (descriptionElement) {
+              descriptionElement.textContent = `Списано ${totalAmount} синапсов`;
+          }
 
-			modal.render({ content: successDescription });
-		})
-		.catch((err) => {
-			console.error(err);
-		});
+          const closeButton = successDescription.querySelector('.order-success__close');
+
+          if (closeButton) {
+              closeButton.addEventListener('click', () => {
+                  modal.close();
+              });
+          }
+
+          modal.render({ content: successDescription });
+      })
+      .catch((err) => {
+          console.error(err);
+      });
 });
 
 events.on(
